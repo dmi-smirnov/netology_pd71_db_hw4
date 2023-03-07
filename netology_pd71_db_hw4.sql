@@ -21,14 +21,14 @@ SELECT m_a.name AS album_name, AVG(m_t.duration)
  GROUP BY m_a.name;
 
 -- 4. Все исполнители, которые не выпустили альбомы в 2020 году.
-SELECT DISTINCT m_ar.name AS artist_has_no_album_in_2020
-  FROM musical_album AS m_al
-       INNER JOIN musical_album_artist AS m_al_ar
-       ON m_al.id = m_al_ar.musical_album_id
-          AND m_al.year_of_release = 2020
-       
-       INNER JOIN musical_artist AS m_ar
-       ON m_al_ar.musical_artist_id != m_ar.id;
+SELECT name AS artist_has_no_album_in_2020
+  FROM musical_artist
+ WHERE id NOT IN (SELECT m_al_ar.musical_artist_id
+                FROM musical_album AS m_al
+                     INNER JOIN musical_album_artist AS m_al_ar
+                     ON m_al.id = m_al_ar.musical_album_id
+                        AND m_al.year_of_release = 2020)
+ ORDER BY name;
 
 -- 5. Названия сборников, в которых присутствует конкретный исполнитель (выберите его сами).
 SELECT m_c.name AS music_collection_with_ray_charles
