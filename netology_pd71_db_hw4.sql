@@ -95,15 +95,15 @@ SELECT m_ar.name AS shortest_track_artist_name
 
 -- 9. Названия альбомов, содержащих наименьшее количество треков.
 SELECT m_al.name AS min_track_count_album_name
-  FROM (SELECT m_t.musical_album_id AS album_id, COUNT(m_t.id) AS track_count
-          FROM musical_track AS m_t
-         GROUP BY album_id) AS musical_album_track_count
-
+  FROM musical_track AS m_t
        INNER JOIN musical_album AS m_al
-       ON musical_album_track_count.album_id = m_al.id
- WHERE track_count = (SELECT MIN(track_count)
-                        FROM (SELECT m_t.musical_album_id AS album_id, COUNT(m_t.id) AS track_count
-                                FROM musical_track AS m_t
-                               GROUP BY album_id) AS musical_album_track_count);
+       ON m_t.musical_album_id = m_al.id
+ GROUP BY min_track_count_album_name
+HAVING COUNT(m_t.id) = (SELECT COUNT(id) AS track_count
+                          FROM musical_track
+                         GROUP BY musical_album_id
+                         ORDER BY track_count
+                         LIMIT 1)
+ ORDER BY min_track_count_album_name;
 
 
