@@ -50,17 +50,30 @@ SELECT m_c.name AS music_collection_with_ray_charles
           AND m_ar.name = 'Ray Charles';
 
 -- 6. Названия альбомов, в которых присутствуют исполнители более чем одного жанра.
+-- вариант без вложенного запроса:
 SELECT m_al.name AS multigenre_artist_album_name
-  FROM (SELECT musical_artist_id AS m_ar_id, COUNT(musical_genre_id)
-          FROM musical_artist_genre AS m_ar_g
-         GROUP BY m_ar_id
-        HAVING COUNT(musical_genre_id) > 1) AS multigenre_artist_id
-      
+  FROM musical_album AS	m_al
        INNER JOIN musical_album_artist AS m_al_ar
-       ON m_ar_id = m_al_ar.musical_artist_id
-
-       INNER JOIN musical_album AS m_al
-       ON m_al_ar.musical_album_id = m_al.id;
+       ON m_al.id = m_al_ar.musical_album_id 
+       
+       INNER JOIN musical_artist AS m_ar
+       ON m_al_ar.musical_artist_id = m_ar.id
+       
+       INNER JOIN musical_artist_genre AS m_ar_g
+       ON m_ar.id = m_ar_g.musical_artist_id
+ GROUP BY multigenre_artist_album_name
+HAVING COUNT(m_ar_g.musical_genre_id) > 1
+ ORDER BY multigenre_artist_album_name;
+-- вариант со вложенным запросом:
+SELECT m_al.name AS multigenre_artist_album_name
+  FROM musical_album AS	m_al
+       INNER JOIN musical_album_artist AS m_al_ar
+       ON m_al.id = m_al_ar.musical_album_id
+ WHERE m_al_ar.musical_artist_id IN (SELECT musical_artist_id
+                                       FROM musical_artist_genre
+                                      GROUP BY musical_artist_id
+                                     HAVING COUNT(musical_genre_id) > 1)
+ ORDER BY multigenre_artist_album_name;
 
 -- 7. Наименования треков, которые не входят в сборники.
 SELECT name AS not_in_collection_track_name
