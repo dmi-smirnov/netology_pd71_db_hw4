@@ -82,16 +82,16 @@ SELECT name AS not_in_collection_track_name
                     FROM musical_track_collection);
 
 -- 8. Исполнитель или исполнители, написавшие самый короткий по продолжительности трек, — теоретически таких треков может быть несколько.
-SELECT DISTINCT m_ar.name AS shortest_track_artist_name
-  FROM (SELECT DISTINCT m_t.musical_album_id AS id
-          FROM musical_track AS m_t
-         WHERE m_t.duration = (SELECT MIN(duration)
-                                 FROM musical_track)) AS shortest_track_album_id
+SELECT m_ar.name AS shortest_track_artist_name
+  FROM musical_track AS m_t
        INNER JOIN musical_album_artist AS m_al_ar
-       ON shortest_track_album_id.id = m_al_ar.musical_album_id
-
+       ON m_t.musical_album_id = m_al_ar.musical_album_id
+       
        INNER JOIN musical_artist AS m_ar
-       ON m_al_ar.musical_artist_id = m_ar.id;
+       ON m_al_ar.musical_artist_id = m_ar.id
+ WHERE m_t.duration = (SELECT MIN(duration)
+                         FROM musical_track)
+ ORDER BY shortest_track_artist_name;
 
 -- 9. Названия альбомов, содержащих наименьшее количество треков.
 SELECT m_al.name AS min_track_count_album_name
